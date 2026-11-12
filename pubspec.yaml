@@ -1,0 +1,49 @@
+name: pocketpos_offline
+description: "PocketPOS Offline — a complete offline-first point of sale and inventory app for Android. No server, no account, no internet required."
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.13.7
+
+dependencies:
+  flutter:
+    sdk: flutter
+  cupertino_icons: ^1.0.8
+
+  # Local persistence (SQLite)
+  sqflite: ^2.4.1
+  path: ^1.9.0
+  path_provider: ^2.1.5
+
+  # State management
+  provider: ^6.1.2
+
+  # Formatting (money / dates)
+  intl: ^0.20.2
+
+  # Hardware & platform features
+  mobile_scanner: ^7.5.0
+  image_picker: ^1.1.2
+  file_picker: ^13.3.3
+  share_plus: ^13.3.1
+
+  # ESC/POS receipt printing
+  esc_pos_utils_plus: ^2.0.4
+  thermal_printer_flutter: ^2.1.0
+
+  # ZIP writer used by the built-in minimal XLSX exporter (see
+  # services/export_service.dart). NOTE: the `excel` package cannot be used
+  # here — excel 4.0.6 does not compile against archive ^4, which
+  # thermal_printer_flutter (via `image`) requires. The app therefore writes
+  # standards-compliant .xlsx files directly; output is verified by tests.
+  archive: ^4.0.7
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+  sqflite_common_ffi: ^2.4.7
+
+flutter:
+  uses-material-design: true
