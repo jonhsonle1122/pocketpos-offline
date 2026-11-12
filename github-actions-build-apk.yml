@@ -1,0 +1,123 @@
+# PocketPOS Offline — GitHub Actions APK build (Checkpoint G4, route A)
+#
+# WHAT THIS IS
+#   Builds the demo APK for PocketPOS Offline v1.0.0 on GitHub's runners,
+#   because the local VM cannot run the Gradle daemon (sandbox blocks its
+#   loopback connection — see BUILD-LOG.md). Free tier, ~10 minutes.
+#
+# HOW TO USE
+#   Route 1 (connector push, preferred): the user creates an EMPTY PRIVATE
+#   repo on their GitHub account (e.g. pocketpos-offline; no README, no
+#   .gitignore, no license — empty, so the first push initializes it
+#   cleanly), adds it to the Muse GitHub App installation, and tells Muse
+#   the repo name. Muse pushes the repo content (this file lives at
+#   .github/workflows/build-apk.yml, pubspec.yaml at the repo root).
+#   Route 2 (manual push, fallback): the user clones the repo on their
+#   own PC, copies the release ZIP contents into it, copies this file to
+#   .github/workflows/build-apk.yml, commits and pushes. See
+#   launch/manual-push-guide.md. Both routes use THIS SAME file: the
+#   binary-restore step below is a no-op when the real binary files are
+#   already present.
+#   The push to main triggers this workflow automatically; it can also
+#   be run manually from the repo's Actions tab. The user downloads the
+#   artifact "pocketpos-demo-apk" from the Actions run (app-release.apk
+#   inside) and sends the APK to Muse: Muse's GitHub tools cannot
+#   download Actions artifacts. Artifact retention: 30 days.
+#
+# BINARY FILES (why some files end in .b64, connector route only)
+#   Muse pushes via the GitHub connector's snapshot push, which accepts
+#   UTF-8 text files only. Six small binary files are therefore stored
+#   as base64 text and decoded back to byte-identical files on the
+#   runner before the build: gradle-wrapper.jar (53,636 bytes) and the
+#   five mipmap launcher icons. The restore step below only decodes a
+#   .b64 file when it exists, so a manual git push carrying the real
+#   binaries skips decoding harmlessly. The buyer-facing source ZIP is
+#   unaffected — it already contains the real binary files.
+#   The same step restores the gradlew executable bit, which neither the
+#   snapshot push nor a Windows git commit preserves reliably.
+#
+# HONEST LIMITS (do not remove these notes)
+#   - This APK is built with Flutter's default debug signing, which is fine
+#     for a demo / for testing on a real device, and for the Codester demo
+#     link. It is NOT a Play-Store-ready signed release: the buyer adds
+#     their own keystore (see app/README.md, "your own signing keystore").
+#   - The workflow runs `flutter analyze` and `flutter test` first and
+#     stops if either fails, so a bad build never produces an APK.
+#   - Toolchain is pinned to the versions verified in BUILD-LOG.md:
+#     Flutter 3.47.9 (Dart 3.13.7), JDK 17.
+#
+# VERIFICATION STATUS
+#   - File written from BUILD-SPEC.md / BUILD-LOG.md / app/pubspec.yaml
+#     (version 1.0.0+1, app at ventures/offline-pos-fullapp/app/).
+#   - YAML syntax checked locally (2026-11-11 and re-checked 2026-11-12
+#     after G4 approval, including the binary-restore step).
+#   - 2026-11-12: restore step made tolerant (decode only if .b64 exists)
+#     so the same file serves both the connector push and the manual
+#     git-push fallback.
+#   - The workflow itself has NOT been run yet — its first run is the
+#     user's private repo, after G4 approval on 2026-11-12.
+
+name: Build PocketPOS APK
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'lib/**'
+      - 'pubspec.yaml'
+      - 'pubspec.lock'
+      - 'android/**'
+      - '.github/workflows/build-apk.yml'
+
+jobs:
+  build-apk:
+    name: Analyze, test, build APK
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+
+      - name: Restore binary assets and gradlew permission
+        run: |
+          if [ -f android/gradle/wrapper/gradle-wrapper.jar.b64 ]; then
+            base64 -d android/gradle/wrapper/gradle-wrapper.jar.b64 > android/gradle/wrapper/gradle-wrapper.jar
+          fi
+          for d in hdpi mdpi xhdpi xxhdpi xxxhdpi; do
+            if [ -f "android/app/src/main/res/mipmap-$d/ic_launcher.png.b64" ]; then
+              base64 -d "android/app/src/main/res/mipmap-$d/ic_launcher.png.b64" > "android/app/src/main/res/mipmap-$d/ic_launcher.png"
+            fi
+          done
+          chmod +x android/gradlew
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Set up Flutter 3.47.9
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.47.9'
+          channel: stable
+          cache: true
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Static analysis (must be clean)
+        run: flutter analyze
+
+      - name: Unit tests (24 tests, must all pass)
+        run: flutter test
+
+      - name: Build release APK (default debug signing — demo only)
+        run: flutter build apk --release
+
+      - name: Upload demo APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: pocketpos-demo-apk
+          path: build/app/outputs/flutter-apk/app-release.apk
+          retention-days: 30
