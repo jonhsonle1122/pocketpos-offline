@@ -1,0 +1,39 @@
+COMMERCIAL SOURCE CODE LICENSE — PLACEHOLDER
+=============================================
+
+IMPORTANT: This is a placeholder license text shipped with the source
+package. The seller must review and finalize the license terms (or replace
+this file with the standard license of the marketplace where the product
+is listed — e.g. Codester / Gumroad terms) BEFORE publishing the product
+for sale. Nothing in this file has been reviewed by a lawyer.
+
+Copyright (c) 2026 <SELLER NAME>. All rights reserved.
+
+1. GRANT (Regular License). Upon purchase, the buyer is granted a
+   non-exclusive, non-transferable license to use, modify and build upon
+   this source code to create ONE end product (one application for one
+   business/brand), and to distribute that compiled end product to end
+   users.
+
+2. EXTENDED LICENSE. As Regular, plus: the right to charge end users for
+   the end product (e.g. paid app, SaaS-style deployment for a single
+   business) and one seller setup assist, where offered.
+
+3. RESTRICTIONS. The buyer may NOT: (a) resell, redistribute, sublicense
+   or share this source code, in whole or in part, whether modified or
+   not; (b) use this source code to create a competing template, kit or
+   stock product; (c) claim ownership of the original code; (d) use it in
+   more end products than the license covers (one per license).
+
+4. OWNERSHIP. The original source code remains the intellectual property
+   of the seller. Components under third-party open-source licenses
+   (Flutter, Dart and the pub.dev packages listed in pubspec.yaml) remain
+   under their respective licenses.
+
+5. WARRANTY & LIABILITY. The software is provided "AS IS", without
+   warranty of any kind, express or implied. To the maximum extent
+   permitted by law, the seller is not liable for any damages arising
+   from the use of this software.
+
+6. SUPPORT. Support, if any, is provided as described in README.md
+   ("Support scope") for the current version only.
