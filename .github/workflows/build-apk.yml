@@ -84,11 +84,19 @@ jobs:
             base64 -d android/gradle/wrapper/gradle-wrapper.jar.b64 > android/gradle/wrapper/gradle-wrapper.jar
           fi
           for d in hdpi mdpi xhdpi xxhdpi xxxhdpi; do
+            if [ -f "android/app/src/main/res/mipmap-$d/ic_launcher.png.b64" ]; then
+              base64 -d "android/app/src/main/res/mipmap-$d/ic_launcher.png.b64" > "android/app/src/main/res/mipmap-$d/ic_launcher.png"
+            fi
             if [ -f "android/app/src/main/res/mipmap-$d/ic_launcher_foreground.png.b64" ]; then
               base64 -d "android/app/src/main/res/mipmap-$d/ic_launcher_foreground.png.b64" > "android/app/src/main/res/mipmap-$d/ic_launcher_foreground.png"
             fi
-
           done
+          # The .b64 sidecars must NOT stay inside res/: Android's resource
+          # merger rejects any file there that does not end in .xml or .png
+          # ("Resource and asset merger: The file name must end with .xml
+          # or .png" — build failure seen 2026-11-13). They have been
+          # decoded above, so delete them before Gradle runs.
+          find android/app/src/main/res -name '*.b64' -delete
           chmod +x android/gradlew
 
       - name: Set up JDK 17
