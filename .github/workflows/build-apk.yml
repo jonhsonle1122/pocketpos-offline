@@ -84,9 +84,10 @@ jobs:
             base64 -d android/gradle/wrapper/gradle-wrapper.jar.b64 > android/gradle/wrapper/gradle-wrapper.jar
           fi
           for d in hdpi mdpi xhdpi xxhdpi xxxhdpi; do
-            if [ -f "android/app/src/main/res/mipmap-$d/ic_launcher.png.b64" ]; then
-              base64 -d "android/app/src/main/res/mipmap-$d/ic_launcher.png.b64" > "android/app/src/main/res/mipmap-$d/ic_launcher.png"
+            if [ -f "android/app/src/main/res/mipmap-$d/ic_launcher_foreground.png.b64" ]; then
+              base64 -d "android/app/src/main/res/mipmap-$d/ic_launcher_foreground.png.b64" > "android/app/src/main/res/mipmap-$d/ic_launcher_foreground.png"
             fi
+
           done
           chmod +x android/gradlew
 
