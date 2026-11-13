@@ -35,11 +35,11 @@ class AppConfig {
   /// Whether default prices include tax for a brand-new install.
   static const bool defaultPricesIncludeTax = false;
 
-  /// Placeholder support e-mail shown in the About section.
-  static const String supportEmail = 'support@example.com';
+  /// Support e-mail shown in the About section.
+  static const String supportEmail = 'jonhsonle1122@gmail.com';
 
   /// App version label (keep in sync with pubspec.yaml `version:`).
-  static const String appVersion = '1.0.0';
+  static const String appVersion = '1.0.1';
 }
 
 /// Currencies offered in Settings → Money. Keep the list small and practical.
