@@ -76,15 +76,18 @@ Everything product-specific is centralised:
 
 1. **`lib/config/app_config.dart`** — the single rebrand point: app name,
    tagline, brand colour (deep teal `#0F766E`), accent colour, default
-   currency/tax, support e-mail placeholder, version label.
+   currency/tax, support e-mail, version label.
 2. **Android app label** — `android/app/src/main/AndroidManifest.xml`
    (`android:label="PocketPOS Offline"`).
 3. **Application ID** — `android/app/build.gradle.kts`
    (`com.pocketpos.offline` is a placeholder; set your own and move the
    `MainActivity.kt` package folder to match).
 4. **App icon** — replace the launcher icons in
-   `android/app/src/main/res/mipmap-*` (or use a generator such as
-   `flutter_launcher_icons`).
+   `android/app/src/main/res/mipmap-*` (legacy `ic_launcher.png` plus the
+   adaptive icon: `mipmap-*/ic_launcher_foreground.png`,
+   `mipmap-anydpi-v26/ic_launcher.xml` and the background colour in
+   `res/values/ic_launcher_background.xml`), or use a generator such as
+   `flutter_launcher_icons`.
 5. **Shop identity shown on receipts** (shop name, address, phone, footer)
    is *end-user data*, edited in the app under Settings — not code.
 
