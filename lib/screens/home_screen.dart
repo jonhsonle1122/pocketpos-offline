@@ -23,6 +23,12 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   int _index = 0;
 
+  /// Key for the Reports screen, so selecting the Reports tab can trigger
+  /// a reload. The IndexedStack keeps Reports alive, so without this the
+  /// dashboard would show whatever its initState load captured — which on
+  /// first run can predate the demo-data seed (see ReportsScreen docs).
+  final _reportsKey = GlobalKey<ReportsScreenState>();
+
   static const _destinations = [
     (icon: Icons.point_of_sale, label: 'Sell'),
     (icon: Icons.inventory_2_outlined, label: 'Products'),
@@ -40,7 +46,7 @@ class _HomeScreenState extends State<HomeScreen> {
       const SellScreen(),
       const ProductsScreen(),
       const OrdersScreen(),
-      const ReportsScreen(),
+      ReportsScreen(key: _reportsKey),
       const SettingsScreen(),
     ];
 
@@ -117,6 +123,12 @@ class _HomeScreenState extends State<HomeScreen> {
     // Keep the shared catalogue fresh when returning to Sell/Products.
     if (i == 0 || i == 1) {
       context.read<CatalogProvider>().reloadAll();
+    }
+    // Reload Reports every time it is opened: the IndexedStack keeps its
+    // state alive, so without this it would keep showing the snapshot
+    // from its first load (possibly taken before the demo seed finished).
+    if (i == 3) {
+      _reportsKey.currentState?.reload();
     }
   }
 }
