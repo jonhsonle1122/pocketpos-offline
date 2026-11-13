@@ -13,24 +13,43 @@ enum ReportRange { today, week, month }
 /// S9 — Reports dashboard: Today/Week/Month, KPI cards (Revenue, Orders,
 /// Avg basket, Profit estimate), revenue bar chart (hourly for today,
 /// daily otherwise), top products, low-stock summary, Excel/CSV export.
+///
+/// The dashboard reloads every time the Reports tab is selected (see
+/// [ReportsScreenState.reload], called from HomeScreen). This is required,
+/// not cosmetic: HomeScreen keeps this screen alive in an IndexedStack, so
+/// the initState load below is the only load that would ever run — and on
+/// first run it can race the async demo-data seed (AppState.completeSetup
+/// notifies listeners, which builds HomeScreen, before seedDemo finishes
+/// inserting sales). Without a reload on becoming visible, the first
+/// visit to Reports can show a stale "No sales in this period yet" even
+/// though sales exist.
 class ReportsScreen extends StatefulWidget {
   const ReportsScreen({super.key});
 
   @override
-  State<ReportsScreen> createState() => _ReportsScreenState();
+  State<ReportsScreen> createState() => ReportsScreenState();
 }
 
-class _ReportsScreenState extends State<ReportsScreen> {
+class ReportsScreenState extends State<ReportsScreen> {
   ReportRange _range = ReportRange.today;
   ReportData? _data;
   bool _loading = true;
   bool _exporting = false;
+
+  /// Monotonic generation of [_load] calls: a slow earlier query must
+  /// never overwrite the result of a newer one (e.g. the initState load
+  /// finishing after a tab-visit reload).
+  int _loadSeq = 0;
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) => _load());
   }
+
+  /// Re-queries the currently selected range. Called by HomeScreen every
+  /// time the Reports tab is selected; keeps the selected range.
+  void reload() => _load();
 
   (DateTime, DateTime) _bounds() {
     final now = DateTime.now();
@@ -51,15 +70,15 @@ class _ReportsScreenState extends State<ReportsScreen> {
   }
 
   Future<void> _load() async {
+    final seq = ++_loadSeq;
     setState(() => _loading = true);
     final (start, end) = _bounds();
     final data = await context.read<AppState>().reports.getReport(start, end);
-    if (mounted) {
-      setState(() {
-        _data = data;
-        _loading = false;
-      });
-    }
+    if (!mounted || seq != _loadSeq) return;
+    setState(() {
+      _data = data;
+      _loading = false;
+    });
   }
 
   Future<void> _export(bool excel) async {
